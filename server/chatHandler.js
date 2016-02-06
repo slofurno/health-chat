@@ -10,17 +10,23 @@ topics["public"] = Topic();
 module.exports = function connectionHandler (ws) {
   var subscriptions = [];
 
+  function cleanup () {
+    subscriptions.forEach(f => f()) 
+  }
+
   var receiveMessage = function (message) {
     ws.send(JSON.stringify(Object.assign({},{
       type: RECEIVE_MESSAGE
     },message)), err => {
       if (err) {
         console.error(err);  
+        cleanup();
       }
     });
   };
 
-  topics['public'].subscribe(receiveMessage);
+  var uf = topics['public'].subscribe(receiveMessage);
+  subscriptions.push(uf);
 
   ws.on('message', function (msg) {
     var command = JSON.parse(msg);
@@ -31,7 +37,8 @@ module.exports = function connectionHandler (ws) {
       if (!topics[command.channel]) {
         topics[command.channel] = Topic();  
       }
-      topics[command.channel].subscribe(receiveMessage)
+      var unsub = topics[command.channel].subscribe(receiveMessage);
+      subscriptions.push(unsub);
       return;
 
     case MESSAGE_CHANNEL:
@@ -43,11 +50,6 @@ module.exports = function connectionHandler (ws) {
       });
       return;
 
-    case CREATE_CHANNEL: 
-      topics[command.channel] = topics[command.channel] || Topic();
-      topics[command.channel].subscribe(receiveMessage);
-      return;
-
     default:
     }
 
@@ -55,7 +57,7 @@ module.exports = function connectionHandler (ws) {
 
   ws.on('close', function () {
     console.log("close");
-    subscriptions.forEach(sub => sub.unsubscribe());
+    cleanup();
   });
 }
 
@@ -67,12 +69,14 @@ function Topic () {
     subscribers.push(f);
     messages.forEach(x => f(x));
    
-    return function unsubscribe () {
+    var unsub = function () {
       var i = subscribers.indexOf(f);
       if (i < 0) return;
 
       subscribers = subscribers.slice(0, i).concat(subscribers.slice(i + 1));
-    }
+    };
+
+    return unsub;
   }
 
   function broadcast (msg) {

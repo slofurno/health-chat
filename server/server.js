@@ -12,5 +12,5 @@ app.use(express.static('../static'));
 
 server.on('request', app);
 
-server.listen(8000, () => console.log("running on port 8000"));
+server.listen(3000, () => console.log("running on port 3000"));
 

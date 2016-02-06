@@ -30,6 +30,8 @@ export default class homeController {
       message: this.message,
       name: this.name 
     }, this.channel)
+
+    this.message = ''
   }
 
   join () {

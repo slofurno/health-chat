@@ -1,19 +1,23 @@
-<h2>YO {{vm.name}}</h2>
-<div>
+<input type="text" ng-model="vm.toJoin" placeholder="join another channel!"/>
+<input type="button" ng-click="vm.join()" value="join"/>
 
-  <ul ng-repeat="c in vm.channels">
-    <li ng-click="vm.switchChannel(c)">{{c}}</li>
-  </ul>
+<input type="text" ng-model="vm.name" placeholder="whats your name?"/>
 
-  <input type="text" ng-model="vm.toJoin" placeholder="join another channel!"/>
-  <input type="button" ng-click="vm.join()" value="join"/>
+<div style="width: 100%; padding: 15px;">
+  <span 
+    ng-repeat="c in vm.channels" 
+    class="click-me" 
+    ng-click="vm.switchChannel(c)"
+    ng-class="{active: c===vm.channel}">
+    {{c}}
+  </span>
+  <div>
+    <div ng-repeat="m in vm.getMessages() track by m.id">
+      <span>{{m.name}} : {{m.message}}</span><br>
+    </div>
 
-  <input type="text" ng-model="vm.message" placeholder="say something!"/>
-  <input type="button" ng-click="vm.send()" value="send"/>
-
-  <h3>channel : {{vm.channel}}</h3>
-  <ul ng-repeat="m in vm.messages | filter:{channel: vm.channel} track by m.id">
-    <li>{{m.id}} | {{m.name}} : {{m.message}}</li>
-  </ul>
+    <input type="text" ng-model="vm.message" placeholder="say something!"/>
+    <input type="button" ng-click="vm.send()" value="send"/>
+  </div>
 </div>
 

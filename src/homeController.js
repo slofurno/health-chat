@@ -1,7 +1,7 @@
 export default class homeController {
   constructor($scope, chatService) {
     this.chat = chatService
-    this.name = 'Steve'
+    this.name = 'user'
     this.message = ''
     this.toJoin = ''
 
@@ -28,7 +28,7 @@ export default class homeController {
   send () {
     this.chat.sendMessage({
       message: this.message,
-      name: 'Steve' 
+      name: this.name 
     }, this.channel)
   }
 
@@ -36,6 +36,11 @@ export default class homeController {
     this.chat.joinChannel(this.toJoin)
     this.channels.push(this.toJoin)
     this.toJoin = ''
+  }
+
+  getMessages () {
+    let chan = this.channel
+    return this.messages.filter(m => m.channel === chan).slice(-20)
   }
 }
 

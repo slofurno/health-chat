@@ -9,6 +9,27 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
+.click-me {
+  background-color: lightskyblue;
+  padding: 6px 16px;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  margin: 0 2px 0 0;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;  
+  -ms-user-select: none;  
+  user-select: none; 
+}
+
+.click-me:hover {
+  background-color: whitesmoke;
+}
+
+.click-me.active {
+  background-color: whitesmoke;
+}
 </style>
 </head>
 <body ng-app="app">

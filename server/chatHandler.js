@@ -1,11 +1,10 @@
-var topics = {};
-
 var JOIN_CHANNEL = 'JOIN_CHANNEL';
 var LEAVE_CHANNEL = 'LEAVE_CHANNEL';
 var MESSAGE_CHANNEL = 'MESSAGE_CHANNEL';
 var RECEIVE_MESSAGE = 'RECEIVE_MESSAGE';
 var CREATE_CHANNEL = 'CREATE_CHANNEL';
 
+var topics = {};
 topics["public"] = Topic();
 
 module.exports = function connectionHandler (ws) {
@@ -21,15 +20,18 @@ module.exports = function connectionHandler (ws) {
     });
   };
 
+  topics['public'].subscribe(receiveMessage);
+
   ws.on('message', function (msg) {
-    console.log(command);
     var command = JSON.parse(msg);
+    console.log(command);
 
     switch(command.type) {
     case JOIN_CHANNEL:
-      var topic = topics[command.channel];
-      if (!topic) return;
-      topic.subscribe(receiveMessage)
+      if (!topics[command.channel]) {
+        topics[command.channel] = Topic();  
+      }
+      topics[command.channel].subscribe(receiveMessage)
       return;
 
     case MESSAGE_CHANNEL:
@@ -55,11 +57,6 @@ module.exports = function connectionHandler (ws) {
     console.log("close");
     subscriptions.forEach(sub => sub.unsubscribe());
   });
-}
-
-function messageHandler (msg) {
-
-  var message = JSON.parse(msg);
 }
 
 function Topic () {

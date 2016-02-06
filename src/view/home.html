@@ -1,5 +1,19 @@
 <h2>YO {{vm.name}}</h2>
 <div>
 
+  <ul ng-repeat="c in vm.channels">
+    <li ng-click="vm.switchChannel(c)">{{c}}</li>
+  </ul>
+
+  <input type="text" ng-model="vm.toJoin" placeholder="join another channel!"/>
+  <input type="button" ng-click="vm.join()" value="join"/>
+
+  <input type="text" ng-model="vm.message" placeholder="say something!"/>
+  <input type="button" ng-click="vm.send()" value="send"/>
+
+  <h3>channel : {{vm.channel}}</h3>
+  <ul ng-repeat="m in vm.messages | filter:{channel: vm.channel} track by m.id">
+    <li>{{m.id}} | {{m.name}} : {{m.message}}</li>
+  </ul>
 </div>
 

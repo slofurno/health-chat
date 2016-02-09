@@ -9,7 +9,8 @@ export default function chatService () {
   let subscribers = [];
   let messages = [];
 
-  let ws = new WebSocket("ws://" + location.host)
+  let host = location.origin.replace(/^http/, 'ws')
+  let ws = new WebSocket(host)
 
   ws.onmessage = function(e) {
 

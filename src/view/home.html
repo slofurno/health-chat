@@ -1,5 +1,5 @@
 <input type="text" ng-model="vm.toJoin" placeholder="join another channel!"/>
-<input type="button" ng-click="vm.join()" value="join"/>
+<input type="button" class="click-me" ng-click="vm.join()" value="join"/>
 
 <input type="text" ng-model="vm.name" placeholder="whats your name?"/>
 
@@ -16,7 +16,7 @@
   <div style="padding: 5px 0;">
 
   <input type="text" ng-model="vm.message" placeholder="say something!"/>
-  <input type="button" ng-click="vm.send()" value="send"/>
+  <input type="button" class="click-me" ng-click="vm.send()" value="send"/>
 
     <div ng-repeat="m in vm.getMessages() track by m.id">
       <span>{{m.name}} : {{m.message}}</span><br>

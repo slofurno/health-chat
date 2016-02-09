@@ -8,7 +8,7 @@ var wss = new WebSocket({server});
 wss.on('connection', chatHandler);
 
 var app = express();
-app.use(express.static('../static'));
+app.use(express.static('./static'));
 
 server.on('request', app);
 

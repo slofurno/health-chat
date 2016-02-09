@@ -17,9 +17,12 @@ export default function chatService () {
     var command = JSON.parse(e.data)
 
     switch(command.type) {
-    case RECEIVE_MESSAGE:    
+    case MESSAGE_CHANNEL:    
+    case JOIN_CHANNEL:
       subscribers.forEach(x => x(command))
       break
+    default:
+      console.log(command)
 
     }
   }
@@ -37,10 +40,11 @@ export default function chatService () {
     }))
   }
 
-  function joinChannel (channel) {
+  function joinChannel (channel, name) {
     ws.send(JSON.stringify({
       type: JOIN_CHANNEL,
-      channel: channel
+      channel,
+      name
     }))
   }
 

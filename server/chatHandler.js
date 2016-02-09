@@ -15,9 +15,7 @@ module.exports = function connectionHandler (ws) {
   }
 
   var receiveMessage = function (message) {
-    ws.send(JSON.stringify(Object.assign({},{
-      type: RECEIVE_MESSAGE
-    },message)), err => {
+    ws.send(JSON.stringify(message), err => {
       if (err) {
         console.error(err);  
         cleanup();
@@ -37,17 +35,18 @@ module.exports = function connectionHandler (ws) {
       if (!topics[command.channel]) {
         topics[command.channel] = Topic();  
       }
-      var unsub = topics[command.channel].subscribe(receiveMessage);
+
+      var topic = topics[command.channel];
+      var unsub = topic.subscribe(receiveMessage);
       subscriptions.push(unsub);
+      topic.broadcast(command);
+
       return;
 
     case MESSAGE_CHANNEL:
       var topic = topics[command.channel];
       if (!topic) return;
-      topic.broadcast({
-        message: command.message,
-        channel: command.channel
-      });
+      topic.broadcast(command);
       return;
 
     default:

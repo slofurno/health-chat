@@ -25,8 +25,6 @@ export default class homeController {
         var {message} = command
         var m = Object.assign({}, {id: nextid++}, {channel}, message)
         this.messages.push(m)
-
-        console.log(m, command)
         break;
 
       case JOIN_CHANNEL:
@@ -36,8 +34,6 @@ export default class homeController {
           name: 'channel'
         }
         var m = Object.assign({}, {id: nextid++}, {channel}, message)
-
-        console.log(m, command)
         this.messages.push(m)
         break
       }

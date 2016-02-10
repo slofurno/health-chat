@@ -6,8 +6,9 @@ const CREATE_CHANNEL = 'CREATE_CHANNEL'
 
 export default function chatService () {
 
-  let subscribers = [];
-  let messages = [];
+  let subscribers = []
+  let messages = []
+  let actions = []
 
   let host = location.origin.replace(/^http/, 'ws')
   let ws = new WebSocket(host)
@@ -19,6 +20,7 @@ export default function chatService () {
     switch(command.type) {
     case MESSAGE_CHANNEL:    
     case JOIN_CHANNEL:
+      //actions['join'].forEach(x => x(command))
       subscribers.forEach(x => x(command))
       break
     default:
@@ -27,6 +29,10 @@ export default function chatService () {
     }
   }
 
+  function on (event, action) {
+    actions[event] = actions[event] || [] 
+    actions[event].push(action)
+  }
 
   function subscribe (f) {
     subscribers.push(f)
@@ -51,7 +57,8 @@ export default function chatService () {
   return {
     subscribe,
     sendMessage,
-    joinChannel
+    joinChannel,
+    on
   }
   
 }

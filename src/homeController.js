@@ -1,4 +1,5 @@
 const JOIN_CHANNEL = 'JOIN_CHANNEL'
+const SET_NAME = 'SET_NAME'
 const LEAVE_CHANNEL = 'LEAVE_CHANNEL'
 const MESSAGE_CHANNEL = 'MESSAGE_CHANNEL'
 const RECEIVE_MESSAGE = 'RECEIVE_MESSAGE'
@@ -13,27 +14,30 @@ export default class homeController {
 
     this.messages = []
     this.channels = ['public']
+
+    this.users = {};
     
     this.channel = 'public'
     let nextid = 0
 
     this.chat.subscribe(command => {
-      let {channel} = command
+      const {message, name, channel} = command
 
       switch(command.type) {
+      case SET_NAME:
+        this.users[command.user] = name
+        break;
       case MESSAGE_CHANNEL:    
-        var {message} = command
-        var m = Object.assign({}, {id: nextid++}, {channel}, message)
+        var m = Object.assign({}, {id: nextid++}, {message, channel, name})
         this.messages.push(m)
         break;
 
       case JOIN_CHANNEL:
-        let {name} = command
-        var message = {
+        var joined = {
           message: `${name} has joined`,
           name: 'channel'
         }
-        var m = Object.assign({}, {id: nextid++}, {channel}, message)
+        var m = Object.assign({}, {id: nextid++}, {channel}, joined)
         this.messages.push(m)
         break
       }
@@ -47,23 +51,25 @@ export default class homeController {
   }
 
   send () {
-    this.chat.sendMessage({
-      message: this.message,
-      name: this.name 
-    }, this.channel)
+    this.chat.sendMessage(this.message, this.channel)
 
     this.message = ''
   }
 
   join () {
-    this.chat.joinChannel(this.toJoin, this.name)
+    this.chat.joinChannel(this.toJoin)
     this.channels.push(this.toJoin)
     this.toJoin = ''
+  }
+
+  setName () {
+    this.chat.setName(this.name)
   }
 
   getMessages () {
     let chan = this.channel
     return this.messages.filter(m => m.channel === chan).slice(-20)
+    //return messages.map(m => Object.assign({}, {name: this.users[m.user]}, m))
   }
 }
 

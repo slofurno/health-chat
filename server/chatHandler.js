@@ -1,20 +1,40 @@
+var crypto = require('crypto');
 var JOIN_CHANNEL = 'JOIN_CHANNEL';
 var LEAVE_CHANNEL = 'LEAVE_CHANNEL';
 var MESSAGE_CHANNEL = 'MESSAGE_CHANNEL';
 var RECEIVE_MESSAGE = 'RECEIVE_MESSAGE';
 var CREATE_CHANNEL = 'CREATE_CHANNEL';
+var SET_NAME = 'SET_NAME';
 
 var topics = {};
+var users = {};
 topics["public"] = Topic();
 
 module.exports = function connectionHandler (ws) {
-  var subscriptions = [];
+  var subscriptions = {};
+  var myid = crypto.randomBytes(16).toString('hex');
+  users[myid] = "user";
 
   function cleanup () {
-    subscriptions.forEach(f => f()) 
+    Object.keys(subscriptions).forEach(c => subscriptions[c]());
   }
 
-  var receiveMessage = function (message) {
+  function joinChannel (channel) {
+    if (subscriptions[channel]) return;
+
+    var unsub = topics[channel].subscribe(receiveMessage);
+    subscriptions[channel] = unsub;
+  }
+
+  function leaveChannel (channel) {
+    if (subscriptions[channel]) {
+      var unsub = subscriptions[channel];
+      unsub();
+      delete subscriptions[channel];
+    }
+  }
+
+  function receiveMessage (message) {
     ws.send(JSON.stringify(message), err => {
       if (err) {
         console.error(err);  
@@ -23,24 +43,39 @@ module.exports = function connectionHandler (ws) {
     });
   };
 
-  var uf = topics['public'].subscribe(receiveMessage);
-  subscriptions.push(uf);
+  joinChannel("public");
 
   ws.on('message', function (msg) {
     var command = JSON.parse(msg);
+    command.user = myid;
+    if (command.type !== SET_NAME) {
+      command.name = users[command.user];
+    }
+
     console.log(command);
 
     switch(command.type) {
+    case SET_NAME:
+      users[myid] = command.name;
+      var topic = topics["public"];
+      topic.broadcast(command);
+      return
+
     case JOIN_CHANNEL:
       if (!topics[command.channel]) {
         topics[command.channel] = Topic();  
       }
 
-      var topic = topics[command.channel];
-      var unsub = topic.subscribe(receiveMessage);
-      subscriptions.push(unsub);
-      topic.broadcast(command);
+      topics[command.channel].broadcast(command);
+      joinChannel(command.channel);
+      return;
 
+    case LEAVE_CHANNEL:
+      if (!topics[command.channel]) return;
+
+      var topic = topics[command.channel];
+      topic.broadcast(command);
+      leaveChannel(command.channel);
       return;
 
     case MESSAGE_CHANNEL:

@@ -3,6 +3,7 @@ const LEAVE_CHANNEL = 'LEAVE_CHANNEL'
 const MESSAGE_CHANNEL = 'MESSAGE_CHANNEL'
 const RECEIVE_MESSAGE = 'RECEIVE_MESSAGE'
 const CREATE_CHANNEL = 'CREATE_CHANNEL'
+const SET_NAME = 'SET_NAME'
 
 export default function chatService () {
 
@@ -12,19 +13,22 @@ export default function chatService () {
 
   let host = location.origin.replace(/^http/, 'ws')
   let ws = new WebSocket(host)
+  let users = {};
 
   ws.onmessage = function(e) {
 
     var command = JSON.parse(e.data)
+    console.log(command)
 
     switch(command.type) {
     case MESSAGE_CHANNEL:    
     case JOIN_CHANNEL:
+    case LEAVE_CHANNEL:
+    case SET_NAME:
       //actions['join'].forEach(x => x(command))
       subscribers.forEach(x => x(command))
       break
     default:
-      console.log(command)
 
     }
   }
@@ -41,16 +45,29 @@ export default function chatService () {
   function sendMessage (message, channel) {
     ws.send(JSON.stringify({
       message, 
-      type: MESSAGE_CHANNEL,
-      channel 
+      channel,
+      type: MESSAGE_CHANNEL
     }))
   }
 
-  function joinChannel (channel, name) {
+  function joinChannel (channel) {
     ws.send(JSON.stringify({
       type: JOIN_CHANNEL,
-      channel,
-      name
+      channel
+    }))
+  }
+
+  function leaveChannel (channel) {
+    ws.send(JSON.stringify({
+      type: LEAVE_CHANNEL,
+      channel
+    }))
+  }
+
+  function setName (name) {
+    ws.send(JSON.stringify({
+      type: SET_NAME,
+      name 
     }))
   }
 
@@ -58,6 +75,8 @@ export default function chatService () {
     subscribe,
     sendMessage,
     joinChannel,
+    leaveChannel,
+    setName,
     on
   }
   

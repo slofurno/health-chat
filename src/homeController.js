@@ -40,6 +40,15 @@ export default class homeController {
         var m = Object.assign({}, {id: nextid++}, {channel}, joined)
         this.messages.push(m)
         break
+
+      case LEAVE_CHANNEL:
+        var left = {
+          message: `${name} has left`,
+          name: 'channel'
+        }
+        var m = Object.assign({}, {id: nextid++}, {channel}, left)
+        this.messages.push(m)
+        break;
       }
       $scope.$digest()
 

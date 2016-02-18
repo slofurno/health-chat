@@ -17,6 +17,12 @@ module.exports = function connectionHandler (ws) {
 
   function cleanup () {
     Object.keys(subscriptions).forEach(c => subscriptions[c]());
+    Object.keys(subscriptions).forEach(channel => topics[channel].broadcast({
+      type: LEAVE_CHANNEL,
+      user: myid,
+      name: users[myid],
+      channel
+    }));
   }
 
   function joinChannel (channel) {
@@ -58,6 +64,7 @@ module.exports = function connectionHandler (ws) {
     case SET_NAME:
       users[myid] = command.name;
       var topic = topics["public"];
+      command.channel = "public";
       topic.broadcast(command);
       return
 

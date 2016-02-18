@@ -11,6 +11,7 @@ export default class homeController {
     this.name = 'user'
     this.message = ''
     this.toJoin = ''
+    this.mouseDown = false
 
     this.messages = []
     this.channels = ['public']
@@ -18,13 +19,16 @@ export default class homeController {
     this.users = {};
     
     this.channel = 'public'
+    this.scroll = 0
     let nextid = 0
 
     this.chat.subscribe(command => {
-      const {message, name, channel} = command
+      const {message, name, channel, user} = command
 
       switch(command.type) {
       case SET_NAME:
+        var m = Object.assign({}, {id: nextid++}, {message:`${this.users[user]||"user"} has changed his name to ${name}`}, command)
+        this.messages.push(m)
         this.users[command.user] = name
         break;
       case MESSAGE_CHANNEL:    
@@ -42,6 +46,7 @@ export default class homeController {
         break
 
       case LEAVE_CHANNEL:
+        console.log("???", command);
         var left = {
           message: `${name} has left`,
           name: 'channel'
@@ -61,7 +66,6 @@ export default class homeController {
 
   send () {
     this.chat.sendMessage(this.message, this.channel)
-
     this.message = ''
   }
 
@@ -79,6 +83,28 @@ export default class homeController {
     let chan = this.channel
     return this.messages.filter(m => m.channel === chan).slice(-20)
     //return messages.map(m => Object.assign({}, {name: this.users[m.user]}, m))
+  }
+
+  mousemove (e) {
+    e.preventDefault()
+    if (this.mouseDown) {
+      let dx = e.movementX;
+      let dy = e.movementY;
+
+      console.log(dx, dy)
+      this.scroll = this.scroll + dy;
+    }
+  }
+
+  mousedown (e) {
+    console.log(e);
+    this.mouseDown = true
+  }
+
+  mouseup (e) {
+
+    console.log(e);
+    this.mouseDown = false
   }
 }
 
